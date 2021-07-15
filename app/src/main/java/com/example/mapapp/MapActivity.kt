@@ -52,18 +52,6 @@ class MapActivity : FragmentActivity(), OnMapReadyCallback {
         }
     }
 
-    //    override fun onMapReady(googleMap: GoogleMap) {
-//        mMap = googleMap
-//
-//        // Add a marker in Sydney and move the camera
-//        val sydney = LatLng(-34, 151)
-//        currentMarker = mMap!!.addMarker(MarkerOptions().position(sydney).title("Текущая позиция"))
-//        mMap!!.moveCamera(CameraUpdateFactory.newLatLng(sydney))
-//        mMap!!.setOnMapLongClickListener { latLng ->
-//            getAddress(latLng)
-//            addMarker(latLng)
-//        }
-//    }
     // Добавление меток на карту и передача в MarkerActivity
     private fun addMarker(location: LatLng): Marker {
         val title =
