@@ -8,4 +8,6 @@
     <string name="label_cancel">Cancel</string>
     <string name="label_ok">Ok</string>
     <string name="msg_hint_name">Enter Name</string>
+    <string name="currentPosition">Текущая позиция</string>
+    <string name="markers">Markers</string>
 </resources>

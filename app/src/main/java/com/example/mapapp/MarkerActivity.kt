@@ -10,10 +10,6 @@ import com.example.mapapp.databinding.ActivityMarkerBinding
 
 class MarkerActivity() : AppCompatActivity() {
     private lateinit var binding: ActivityMarkerBinding
-    private var latit: String? = null
-    private var lontit: String? = null
-    //   var personList = ArrayList<Person>()
-
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,27 +26,24 @@ class MarkerActivity() : AppCompatActivity() {
                 markerItem
             )
         }
-
     }
 
     private fun fillList(): java.util.ArrayList<Marker>? {
         val extras = intent.extras
-        val personList = extras?.getParcelableArrayList<Marker>("personList")
-        return personList
+        val markerList = extras?.getParcelableArrayList<Marker>("markerList")
+        return markerList
     }
 
 
-    private fun markerItemClicked(partItem: Marker) {
+    private fun markerItemClicked(markerItem: Marker) {
         Toast.makeText(
             this,
-            "Clicked: ${partItem.latit + "\n" + partItem.lontit}",
+            " ${markerItem.adress + "\n" + markerItem.latit + "\n" + markerItem.lontit}",
             Toast.LENGTH_LONG
         ).show()
         SimpleFragment.newInstance(getString(R.string.label_logout), getString(R.string.msg_logout))
             .show(supportFragmentManager, SimpleFragment.TAG)
-
     }
-
 }
 
 

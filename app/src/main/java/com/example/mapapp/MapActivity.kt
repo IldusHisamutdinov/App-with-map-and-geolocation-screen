@@ -22,17 +22,14 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_maps.*
 import java.io.IOException
-
+import java.text.DecimalFormat
 
 class MapActivity : FragmentActivity(), OnMapReadyCallback {
     private lateinit var binding: ActivityMapsBinding
     private var currentMarker: Marker? = null
     private var mMap: GoogleMap? = null
-    var latit: String? = null
-    var lontit: String? = null
     var adress: String? = null
     val newList = ArrayList<com.example.mapapp.Marker>()
-    //   var newList = mutableListOf<Person>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,12 +44,12 @@ class MapActivity : FragmentActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap!!.setOnMapLongClickListener { latLng ->
-            //          getAddress(latLng)
             addMarker(latLng)
+            geocoder(latLng)
         }
     }
 
-    // Добавление меток на карту и передача в MarkerActivity
+    // Добавление меток на карту
     private fun addMarker(location: LatLng): Marker {
         val title =
             java.lang.Double.toString(location.latitude) + "," + java.lang.Double.toString(location.longitude)
@@ -67,8 +64,16 @@ class MapActivity : FragmentActivity(), OnMapReadyCallback {
                 .radius(55000.0)
                 .strokeColor(Color.BLUE)
         )
-        latit = java.lang.Double.toString(location.latitude)
-        lontit = java.lang.Double.toString(location.longitude)
+        return marker
+    }
+
+    //получение адреса и передача в список MarkerActivity
+    fun geocoder(location: LatLng) {
+        // 3 знака после запятой
+        val df = DecimalFormat()
+        df.setMaximumFractionDigits(3)
+        val latit: Double = df.format(location.latitude).toDouble()
+        val lontit: Double = df.format(location.longitude).toDouble()
 
         val geocoder = Geocoder(this)
         Thread {
@@ -80,19 +85,18 @@ class MapActivity : FragmentActivity(), OnMapReadyCallback {
                 e.printStackTrace()
             }
         }.start()
-
+        // задержка для получения адреса
         Handler(Looper.getMainLooper()).postDelayed({
             adress = textAddress.text.toString()
             newList.add(Marker(latit.toString(), lontit.toString(), adress))
-            println(adress)
-        }, 2000)
+        }, 1000)
         markerShow()
-        return marker
     }
 
-    //    // Запрос координат
+    // Запрос координат
     @SuppressLint("MissingPermission")
     private fun requestLocation() {
+        val geocoder = Geocoder(this)
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -109,13 +113,36 @@ class MapActivity : FragmentActivity(), OnMapReadyCallback {
         if (provider != null) {
             locationManager.requestLocationUpdates(provider, 10000, 10f, object : LocationListener {
                 override fun onLocationChanged(location: Location) {
-                    val lat = location.latitude // Широта
-                    val lng = location.longitude // Долгота
+                    val df = DecimalFormat()
+                    df.setMaximumFractionDigits(3)
+                    val lat: Double = df.format(location.latitude).toDouble()
+                    val lng: Double = df.format(location.longitude).toDouble()
                     val currentPosition = LatLng(lat, lng)
+                    Thread {
+                        try {
+                            val addresses: List<Address> =
+                                geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                            textAddress.post(Runnable {
+                                textAddress.setText(
+                                    addresses[0].getAddressLine(
+                                        0
+                                    )
+                                )
+                            })
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+                    }.start()
+                    // задержка для получения адреса
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        adress = textAddress.text.toString()
+                        newList.add(Marker(lat.toString(), lng.toString(), adress))
+                    }, 1000)
+                    markerShow()
                     currentMarker = mMap!!.addMarker(
                         MarkerOptions()
                             .position(currentPosition)
-                            .title("Текущая позиция-")
+                            .title("Текущая позиция")
                     )
                     mMap!!.moveCamera(
                         CameraUpdateFactory.newLatLngZoom(
@@ -194,7 +221,7 @@ class MapActivity : FragmentActivity(), OnMapReadyCallback {
     fun markerShow() {
         binding.back.setOnClickListener {
             val intent = Intent(this, MarkerActivity::class.java)
-            intent.putParcelableArrayListExtra("personList", newList)
+            intent.putParcelableArrayListExtra("markerList", newList)
             startActivity(intent)
         }
     }
