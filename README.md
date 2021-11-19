@@ -5,3 +5,5 @@
 * Находит устройство по геолокации. 
 * На карте можно ставить маркеры
 * Можно посмотреть список маркеров
+
+![Output sample](https://github.com/IldusHisamutdinov/AppMovies/blob/main/app/src/main/res/drawable/moviesapp.gif)
